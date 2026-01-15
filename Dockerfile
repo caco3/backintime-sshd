@@ -13,9 +13,9 @@ ENV         CACHED_SSH_DIRECTORY="${CONF_VOLUME}/ssh" \
 
 RUN         apk add --upgrade --no-cache \
                     bash \
-                    bash-completion \
                     rsync \
                     openssh \
+                    fclones \
             && \
             mkdir -p /root/.ssh "${CONF_VOLUME}" "${AUTHORIZED_KEYS_VOLUME}" \
             && \
