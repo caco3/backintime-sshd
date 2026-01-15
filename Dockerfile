@@ -15,7 +15,7 @@ RUN         apk add --upgrade --no-cache \
                     bash \
                     bash-completion \
                     rsync \
-                    openssh=${OPENSSH_VERSION} \
+                    openssh \
             && \
             mkdir -p /root/.ssh "${CONF_VOLUME}" "${AUTHORIZED_KEYS_VOLUME}" \
             && \
