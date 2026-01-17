@@ -1,125 +1,113 @@
-## Make your OpenSSH fly on Alpine
+# Backintime-sshd
 
-### Overview
+## Overview
 
-Use this Dockerfile / -image to start a slim and highly customizable sshd-server with `bash` and `rsync` installed.
+This project provides a docker image containing an SSH server ready-to-go for the backup data of [Back In Time](https://github.com/bit-team/backintime).
+Run this container on your remote host (eg. NAS) and no longer depend on the natively installed SSH server and rsync.
 
-### Tags
+This image is based on the work of [https://github.com/Hermsi1337/docker-sshd](https://github.com/Hermsi1337/docker-sshd) but is adapted and simplified to the needs of [Back In Time](https://github.com/bit-team/backintime).
 
-For recent tags check [Dockerhub](https://hub.docker.com/r/caco3x/alpine-sshd/tags/).
+## Prebuild Images
 
-### Features
+For recent versions are availabe on the [Dockerhub](https://hub.docker.com/repository/docker/caco3x/backintime-sshd).
 
-* `bash`-shell, `rsync` and `fclones` installed
-* Default `.bashrc` from `ubuntu`
-* Desired shell is configurable by --env
-* En- or disable `root`-user by --env
-  * Choose between keypar and password auth for `root`
-  * Password for `root` is configurable by --env
-* Additional ssh-users can be created by --env
-  * Authentication for additional users is done by keypair
-* Beautifully colored log output 
+## Docker Compose
+See example in [docker-compose.yaml](docker-compose.yaml)
 
-### Usage examples
+### Environment variables
 
-#### Authentication as root by password
+| Variable | Explanation |
+|:-----------------:|:------------------------------------------------------------------------------------------------------------------------------------:|
+| USERNAME | Username on the remote host system and SSH, usually `backintime` |
+| PUBLIC_KEY | SSH public key for user authentication |
 
-```bash
-$ docker run --rm \
---publish=1337:22 \
---env ROOT_PASSWORD=MyRootPW123 \
-caco3x/alpine-sshd
-```
+# Preparations on your remote host
+The remote host is where your backups will be stored, eg. a designated Linux machine or a NAS. See the [Back In Time documentation](https://backintime.readthedocs.io/en/latest/#ssh) for details.
 
-After the container is up you are able to ssh in it as root with the in --env provided password for "root"-user.
+The following screenshots show the preparations on an Ugreen NAS, but can be adapted to any Linux system.
 
-```bash
-$ ssh root@mydomain.tld -p 1337
-```
+1. Create a normal user on the remote host. Ideally call it `backintime`:
 
-#### Authentication as root by ssh-keypair
+    ![Create User](doc/create-user.png)
 
-```bash
-$ docker run --rm \
---publish=1337:22 \
---env ROOT_KEYPAIR_LOGIN_ENABLED=true \
---volume /path/to/authorized_keys:/root/.ssh/authorized_keys \
-caco3x/alpine-sshd
-```
+1. Install the docker app:
 
-After the container is up you are able to ssh in it as root with a private-key which matches the provided public-key in authorized_keys for "root"-user.
+    ![Install docker app](doc/install-docker-app.png)
 
-```bash
-$ ssh root@mydomain.tld -p 1337 -i /path/to/private_key
-```
+1. Create a new docker compose project (Use to the example [Docker Compose file](docker-compose.yaml)):
+    ![Create docker compose project](doc/create-docker-compose-project.png)
 
-#### Authenticate as additional user by ssh-keypair
+1. Add the SSH Public Key to the `PUBLIC_KEY` variable (replace the example key).
 
-```bash
-$ docker run --rm \
---publish=1337:22 \
---env SSH_USERS="caco3:1000:1000" \
---volume /path/to/caco3_public_key:/conf.d/authorized_keys/caco3 \
-caco3x/alpine-sshd
-```
+1. If you did not use `backintime` for the user name, you must set the correct name in `USERNAME` and in the mount path!
 
-After the container is up you are able to ssh in it as the given user with a private-key that matches the provided public-key in authorized_keys for your created user.
+## Move your existing backups
+The next steps only apply if you already have existing [Back In Time](https://github.com/bit-team/backintime) backups.
 
-```bash
-$ ssh mydomain.tld -l caco3 -p 1337 -i /path/to/caco3_private_key
-```
+1. Move your existing backups to the new location on the remote host.
+1. Make sure the access rights and owner of the existing backup data is set correctly. This can eg. be done with the following commands (`/volume1/backintime` refers to the backup data location):
+    ```bash
+    sudo chown backintime:users /volume1/backintime -R
+    sudo chmod 755 /volume1/backintime“
+    ```
 
-#### Create multiple, additional users with keypair
+1. Start the container.
 
-```bash
-$ docker run --rm \
---publish=1337:22 \
---env SSH_USERS="caco3:1000:1000,dennis:1001:1001" \
---volume /path/to/caco3_public_key:/conf.d/authorized_keys/caco3 \
---volume /path/to/dennis_public_key:/conf.d/authorized_keys/dennis \
-caco3x/alpine-sshd
-```
+1. On your PC, resp. the device which runs the Back In Time application, run the following command to make sure the password-less SSH connection is possible:
+    ```bash
+    ssh -i /path/to/the/id_rsa/file backintime@remote-host-ip -p 10022
+    ``` 
+    Replace `/path/to/the/id_rsa/file` with the path to your private key and `remote-host-ip` with the IP address of your remote host.
+    
+    If it is the first time you connect to this SSH host, you will have to confirm the authenticity:
+    ```bash
+    The authenticity of host '[192.168.1.8]:10022 ([192.168.1.8]:10022)' can't be established.
+    ED25519 key fingerprint is SHA256:AFkKsBidxbeZ/VIuKkyckXL4Jn0EPZIpKMhAPDgtpkI.
+    This key is not known by any other names.
+    Are you sure you want to continue connecting (yes/no/[fingerprint])?
+    ```
+    
+    Type `yes` and press `Enter`.
 
-After the container is up you are able to ssh in it as one of the given users with a private-key that matches the provided public-key in authorized_keys for your desired user.
+    You then should see the following welcome screen:
+    ```bash
+    Welcome on the remoste host for Back In Time.
 
-```bash
-$ ssh root@mydomain.tld -p 1337 -i /path/to/private_key
-```
+    If you were able to log in without using a password, all is set up correctly.
 
-#### Docker Compose
-```yaml
-services:
-  sshd:
-    image: caco3x/docker-sshd
-    environment:
-      - SSH_USERS=caco3:1000:10
-    ports:
-      - 10022:22
-    volumes:
-      - ./authorized_keys:/conf.d/authorized_keys/caco3
-```
+    You may exit the SSH connection again by pressing `CTRL-D`.
 
-### Configuration
+    See for more details see https://github.com/caco3/backintime-sshd/blob/main/README.md.
+    ```
 
-While beeing very slim and vanilla this image is still highly customizable.
+1. To confirm the backup data is mounted correctly into the docker container, run
+    ```bash
+    ls -l backintime
+    ```
 
-#### Environment variables
+    You should see a list of all existing backups (example):
+    ```bash
+    drwxrwxrwx    3 backintime users         4096 Jan 10 21:03 20260110-220001-751
+    drwxrwxrwx    3 backintime users         4096 Jan 11 21:03 20260111-220002-751
+    drwxrwxrwx    3 backintime users         4096 Jan 11 21:19 20260111-221825-751
+    drwxr-xr-x    3 backintime users         4096 Jan 14 23:38 20260115-003523-751
+    drwxr-xr-x    3 backintime users         4096 Jan 15 21:03 20260115-220006-751
+    drwxr-xr-x    3 backintime users         4096 Jan 16 20:09 20260116-210620-751
+    drwxrwxrwx    3 backintime users         4096 Jan 16 22:01 20260116-225831-751
+    drwxrwxrwx    3 backintime users         4096 Jan 17 18:46 20260117-194211-751
+    lrwxrwxrwx    1 backintime users            1 Dec  9 21:35 backintime -> .
+    lrwxrwxrwx    1 backintime users           19 Jan 17 18:46 last_snapshot -> 20260117-194211-751
+    ```
 
-| Variable | Possible Values | Default value | Explanation |
-|:-----------------:|:-----------------:|:----------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------------------:|
-| ROOT_LOGIN_UNLOCKED | 'true' or 'false' | 'false' | Whether to enable or disable login as 'root' user |
-| ROOT_KEYPAIR_LOGIN_ENABLED | 'true' or 'false' | 'false' | Enable login as 'root' by keypair (implies `ROOT_LOGIN_UNLOCKED`). Must mount public-key into container: `/root/.ssh/authorized_keys` |
-| ROOT_PASSWORD | any desired string | `undefined` | Set password for login as `root` (implies `ROOT_LOGIN_UNLOCKED`) |
-| USER_LOGIN_SHELL | any existing shell | `/bin/bash` | Choose the desired default shell for all additional users. If the configured shell is not existent, a fallback to `/bin/ash` is applied |
+1. The remote host is now setup correctly and you can exit the connection by pressing `CTRL-D`.
 
-### Extending this image
+# Configuration in the Back In Time application
+1. Setup [Back In Time](https://github.com/bit-team/backintime) as normal. 
 
-This image is designed to be as slim and vanilla as possible.   
-If you need additional Tools like `git` , I definetly recommend to build your own image on top of `alpine-sshd`:
+    Below are the required parameters for the remote host documented:
+    - Hostname: `remote-host-ip`
+    - Port: `10022`
+    - User: `backintime`
+    - Key: `/path/to/the/id_rsa/file`
 
-```Dockerfile
-FROM  caco3x/alpine-sshd:latest
-
-RUN   apk add --no-cache \
-            git
-```
+    ![General Settings](doc/backintime-settings-general.png)
