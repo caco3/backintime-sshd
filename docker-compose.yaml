@@ -12,4 +12,7 @@ services:
     volumes:
       - ./ssh:/etc/ssh
       - /etc/passwd:/passwd:ro
+      - type: bind
+        source: /volume2/backintime
+        target: /home/backintime/backintime
   
