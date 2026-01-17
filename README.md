@@ -60,6 +60,20 @@ The next steps only apply if you already have [Back In Time](https://github.com/
     ``` 
     Replace `/path/to/the/id_rsa/file` with the path to your private key and `remote-host-ip` with the IP address of your remote host.
     
+    Since it is the first time you connect to this SSH host, you will have to have to confirm the 
+    ```bash
+    The authenticity of host '[192.168.1.8]:10022 ([192.168.1.8]:10022)' can't be established.
+    ED25519 key fingerprint is SHA256:AFkKsBidxbeZ/VIuKkyckXL4Jn0EPZIpKMhAPDgtpkI.
+    This key is not known by any other names.
+    Are you sure you want to continue connecting (yes/no/[fingerprint])?
+    ```
+    
+    Type `yes` and press `Enter`.
+
+    You then should see the following welcome screen:
+    ```bash
+
+    ```
 
 # Configuration in Back In Time
 1. Setup [Back In Time](https://github.com/bit-team/backintime) as normal. Below are the required parameters for SSH documented:
