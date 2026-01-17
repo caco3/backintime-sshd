@@ -1,5 +1,9 @@
 # Backintime-sshd
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/caco3x/backintime-sshd?style=flat-square&logo=docker)](https://hub.docker.com/r/caco3x/backintime-sshd/)
+[![Docker Stars](https://img.shields.io/docker/stars/caco3x/backintime-sshd?style=flat-square&logo=docker)](https://hub.docker.com/r/caco3x/backintime-sshd/)
+[![Image Size](https://img.shields.io/docker/image-size/caco3x/backintime-sshd/latest?style=flat-square&logo=docker)](https://hub.docker.com/r/caco3x/backintime-sshd/)
+
 ## Overview
 
 This project provides a docker image containing an SSH server ready-to-go for the backup data of [Back In Time](https://github.com/bit-team/backintime).
