@@ -26,6 +26,15 @@ See example in [docker-compose.yaml](docker-compose.yaml)
 | PUBLIC_KEY | SSH public key for user authentication |
 
 
+### Folders
+The following folders/files must be mapped as a volume:
+- `/home/${USERNAME}/backintime`: Location for your backup data
+- `/etc/ssh`: Folder to store the SSH connection configuration (public key, session, ...)
+- `/etc/passwd`: Read only access to the hosts passwd file. This is needed to get the UID and GID of the user
+
+> [!WARNING]
+> On some systems (like eg. the Synology NAS's), the local folders must be created manually.
+
 ### Data Persistance
 > [!CAUTION]
 > It is crutial to make sure that the `backintime` folder is mapped onto the remote hosts filesystem! Disregarding this means that you will lose your data when you delete the docker container! Use the remote hosts filebrowser to validate the new backups are effectively there!

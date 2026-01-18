@@ -11,7 +11,9 @@ services:
       - 10022:22
     restart: unless-stopped
     volumes:
+      # Folder to store the SSH connection configuration (public key, session, ...)
       - ./ssh:/etc/ssh
+      # Read only access to the hosts passwd file. This is needed to get the UID and GID of the user
       - /etc/passwd:/passwd:ro
       # Map the backup files into the folder "backintime" of the user "backintime" 
       # This is crutial since the backup data else only is stored in the docker container and gets lost once you delete it!
