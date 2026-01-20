@@ -59,19 +59,9 @@ The following screenshots show the preparations on an Ugreen NAS, but can be ada
 
 1. If you did not use `backintime` for the user name, you must set the correct name in `USERNAME` and in the mount path!
 
-## Move your existing backups
-The next steps only apply if you already have existing [Back In Time](https://github.com/bit-team/backintime) backups.
+1. Start the docker container and check there is no error in the log.
 
-1. Move your existing backups to the new location on the remote host.
-1. Make sure the access rights and owner of the existing backup data is set correctly. This can eg. be done with the following commands (`/volume1/backintime` refers to the backup data location):
-    ```bash
-    sudo chown backintime:users /volume1/backintime -R
-    sudo chmod 755 /volume1/backintime“
-    ```
-
-1. Start the container.
-
-1. On your PC, resp. the device which runs the Back In Time application, run the following command to make sure the password-less SSH connection is possible:
+1. On your PC, resp. the device which runs the Back In Time application, run the following command in a shell to check if the password-less SSH connection works as expected:
     ```bash
     ssh -i /path/to/the/id_rsa/file backintime@remote-host-ip -p 10022
     ``` 
@@ -96,6 +86,17 @@ The next steps only apply if you already have existing [Back In Time](https://gi
     You may exit the SSH connection again by pressing `CTRL-D`.
 
     See for more details see https://github.com/caco3/backintime-sshd/blob/main/README.md.
+    ```
+
+## Move your existing backups
+The next steps only apply if you already have existing [Back In Time](https://github.com/bit-team/backintime) backups.
+
+1. Move your existing backups to the new location on the remote host.
+1. Open an SSH connection to the remote host (see above)
+1. Make sure the access rights and owner of the existing backup data is set correctly. This can eg. be done with the following commands (`/volume1/backintime` refers to the backup data location):
+    ```bash
+    sudo chown backintime:users /volume1/backintime -R
+    sudo chmod 755 /volume1/backintime“
     ```
 
 1. To confirm the backup data is mounted correctly into the docker container, run
